@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        #container{
+            width: 800px;
+            margin : 20px auto;
+        }
+        table, tr, th, td {
+            text-align: center;
+            border : 2px solid #bbb;
+            border-collapse: collapse;
+            padding : 5px;
+        }
+        th {
+            color : rgb(132, 39, 219);
+            background-color: aliceblue;
+            width: 150px;
+            /* font-size: 30px; */
+        }
+        td{
+            width: 500px;
+        }
+        #contents{
+            padding: 10px;
+            height: 200px;
+        }
+        #title {
+            width: 490px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="container">
+            <table>
+                <tr>
+                    <th>제목</th>
+                    <td><input id="title" v-model="title"></td>
+                </tr>
+                <tr>
+                    <th>내용</th>
+                    <td id="contents">
+                        <textarea v-model="contents" rows="20" cols="70"></textarea>
+                    </td>
+                </tr>            
+            </table>
+            <div style="margin-top : 5px;">
+                <button @click="fnSave" style="margin-right: 5px;">저장</button>
+                <button>되돌아가기</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                // 변수
+                userId : "user01",
+                title : "",
+                contents : ""
+            };
+        },
+        methods: {
+            // 함수(메소드)
+            fnSave: function () {
+                let self = this;
+                let nparmap = {
+                    title : self.title,
+                    contents : self.contents,
+                    userId : self.userId,
+                    kind : 1
+                };
+                $.ajax({
+                    url: "http://localhost:3000/insert",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        alert("작성되었습니다.");
+                        location.href = "board-list.html";
+                    }
+                });
+            }
+        },
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+        }
+    });
+
+    app.mount('#app');
+</script>

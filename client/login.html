@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        #container{
+            width: 600px;
+            margin : 100px auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="container">
+            <div>
+                <label>
+                    아이디 : <input v-model="userId">
+                </label>
+            </div>
+            <div>
+                <label>
+                    패스워드 : <input v-model="pwd">
+                </label>
+            </div>
+            <div>
+                <button @click="fnLogin">로그인</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                // 변수
+                userId : "",
+                pwd : ""
+            };
+        },
+        methods: {
+            // 함수(메소드)
+            fnLogin : function () {
+                let self = this;
+                if(self.userId == "" || self.pwd == ""){
+                    alert("아이디/패스워드 입력하셈");
+                    return;
+                }
+                let nparmap = {
+                    userId : self.userId,
+                    pwd : self.pwd
+                };
+                $.ajax({
+                    url: "http://localhost:3000/login",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        if(data.msg == "success"){
+                            alert(data.user.USERNAME + "님 환영합니다!");
+                            location.href = "board-list.html";
+                        } else {
+                            alert("로그인 실패! 아이디/패스워드 확인해주세요.");
+                        }
+                    }
+                });
+            }
+        },
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+        }
+    });
+
+    app.mount('#app');
+</script>

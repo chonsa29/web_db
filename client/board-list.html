@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연습!!!!!!!!</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        table, tr, th, td {
+            text-align: center;
+            border : 2px solid #bbb;
+            border-collapse: collapse;
+            padding : 5px;
+        }
+        th {
+            color : rgb(132, 39, 219);
+            background-color: aliceblue;
+            /* font-size: 30px; */
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <table>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>조회수</th>
+                <th>작성일</th>
+                <th>삭제</th>
+            </tr>
+            <tr v-for="item in list">
+                <td>{{item.BOARDNO}}</td>
+                <td>
+                    <a href="javascript:;" @click="fnView(item.BOARDNO)">{{item.TITLE}}</a>
+                </td>
+                <td>
+                    <a href="javascript:;" @click="fnUser(item.USERID)">{{item.USERNAME}}</a>
+                </td>
+                <td>{{item.CNT}}</td>
+                <td>{{item.CDATETIME}}</td>
+                <td><button @click="fnRemove(item.BOARDNO)">삭제</button></td>
+            </tr>
+        </table>
+        <div>
+            <button @click="fnInsert">글쓰기</button>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                list : [] 
+            };
+        },
+        methods: {
+            fnList : function() { 
+                var self = this;
+                var nparmap = {};
+                $.ajax({
+                    url: "http://localhost:3000/list",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function(data) {
+                        console.log(data);
+                        self.list = data.list;
+                    }
+                });
+            },
+            fnRemove : function(boardNo){
+                var self = this;
+                var nparmap = {boardNo : boardNo}; // {boardNo}
+                if(!confirm("정말 삭제할거?")){
+                    return;
+                }
+                $.ajax({
+                    url: "http://localhost:3000/remove",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function(data) {
+                        alert("삭제되었습니다!");
+                        console.log(data);
+                        self.fnList();
+                        
+                    }
+                });
+            },
+            fnView : function(boardNo){
+                location.href = "board-view.html?boardNo="+boardNo;
+            },
+            fnInsert : function(){
+                location.href = "board-insert.html";
+            },
+            fnUser : function(userId){
+                location.href = "user-view.html?userId="+userId;
+            }
+
+            
+        }, // methods
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+            this.fnList();
+        }
+    });
+
+    app.mount('#app');
+</script>

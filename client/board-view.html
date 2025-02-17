@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>연습!!!!!!!!</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        #container{
+            width: 800px;
+            margin : 20px auto;
+        }
+        table, tr, th, td {
+            text-align: center;
+            border : 2px solid #bbb;
+            border-collapse: collapse;
+            padding : 5px;
+        }
+        th {
+            color : rgb(132, 39, 219);
+            background-color: aliceblue;
+            width: 150px;
+            /* font-size: 30px; */
+        }
+        td{
+            width: 500px;
+        }
+        #contents{
+            padding: 30px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="container">
+            <table>
+                <tr>
+                    <th>제목</th>
+                    <td>{{info.TITLE}}</td>
+                </tr>
+                <tr>
+                    <th>작성자</th>
+                    <td>{{info.USERNAME}}</td>
+                </tr>
+                <tr>
+                    <th>작성일</th>
+                    <td>{{info.CDATETIME}}</td>
+                </tr>
+                <tr>
+                    <th>조회수</th>
+                    <td>{{info.CNT}}</td>
+                </tr>
+                <tr>
+                    <th>내용</th>
+                    <td id="contents">{{info.CONTENTS}}</td>
+                </tr>
+            </table>
+            <div style="margin-top : 10px">
+                <button @click="fnRemove">삭제</button>
+                <button @click="fnEdit">수정</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                info : {},
+                boardNo : "" 
+            };
+        },
+        methods: {
+            fnInfo : function() { 
+                var self = this;
+                var nparmap = {boardNo : self.boardNo};
+                $.ajax({
+                    url: "http://localhost:3000/view",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function(data) {
+                        console.log(data.info);
+                        self.info = data.info;
+                    }
+                });
+            },
+            fnRemove : function(){
+                var self = this;
+                var nparmap = {boardNo : self.boardNo}; // {boardNo}
+                if(!confirm("정말 삭제할거?")){
+                    return;
+                }
+                $.ajax({
+                    url: "http://localhost:3000/remove",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function(data) {
+                        alert("삭제되었습니다!");
+                        location.href="board-list.html";
+                        // history.back();
+                        
+                    }
+                });
+            },
+            fnEdit: function(){
+                let self = this;
+                location.href = "board-edit.html?boardNo="+self.boardNo;
+            }
+        }, // methods
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+            const queryParams = new URLSearchParams(window.location.search);
+            this.boardNo = queryParams.get('boardNo'); 
+            console.log("boardNo ===> ", this.boardNo);
+            this.fnInfo();
+        }
+    });
+
+    app.mount('#app');
+</script>
