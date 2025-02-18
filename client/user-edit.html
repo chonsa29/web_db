@@ -23,10 +23,14 @@
         </div>
         <div>
             성별 : 
-            <input v-model="user.GENDER">
+            <!-- <input v-model="user.GENDER"> -->
+             <select v-model="user.GENDER">
+                <option value="M">남자</option>
+                <option value="F">여자</option>
+             </select>
         </div>
         <div>
-            <button @click="">저장</button>
+            <button @click="fnEdit">저장</button>
         </div>
     </div>
 </body>
@@ -37,8 +41,8 @@
         data() {
             return {
                 // 변수
-                userId: "",
-                user: {}
+                userId : "",
+                user : {}
             };
         },
         methods: {
@@ -61,12 +65,32 @@
                     }
                 });
             },
+            fnEdit : function(){
+                let self = this;
+                let nparmap = self.user;
+                $.ajax({
+                    url: "http://localhost:3000/user/edit",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        if(data.msg == "success"){
+                            alert("수정되었습니다.");
+                            location.href="board-list.html";
+                        } else {
+                            alert("수정 실패!");
+                        }
+                    }
+                });
+            }
         },
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this;
             const queryParams = new URLSearchParams(window.location.search);
-            this.userId = queryParams.get('userId'); 
+            self.userId = queryParams.get('userId');
+
             self.fnGetUser();
         }
     });

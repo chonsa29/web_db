@@ -1,169 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>연습!!!!!!!!</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        table,
-        tr,
-        th,
-        td {
+        table, tr, th, td {
             text-align: center;
-            border: 2px solid #bbb;
+            border : 2px solid #bbb;
             border-collapse: collapse;
-            padding: 5px;
+            padding : 5px;
         }
-
         th {
-            color: rgb(132, 39, 219);
+            color : rgb(132, 39, 219);
             background-color: aliceblue;
+            /* font-size: 30px; */
         }
-
-        a {
+        .r-margin {
+            margin-right: 5px;
+        }
+        .a-margin {
+            width: 430px;
+            margin : 10px;
+            text-align: center;
+        }
+        #index {
+            margin-right: 3px;
+            text-decoration: none;
+        }
+        .color-black{
+            color : black;
+        }
+        .color-blue{
+            color : blue;
+        }
+        .bgcolor-gray{
+            background-color: #ddd;
+        }
+        #container{
+            width: 500px;
+            margin : 20px auto;
+        }
+        a{
             text-decoration: none;
         }
     </style>
 </head>
-
 <body>
     <div id="app">
-        <table>
-            <tr>
-                <th>번호</th>
-                <th @click="fnOrder('TITLE')">제목</th>
-                <th @click="fnOrder('USERNAME')">작성자</th>
-                <th @click="fnOrder('CNT')">조회수</th>
-                <th>작성일</th>
-                <th>삭제</th>
-            </tr>
-            <tr v-for="item in paginatedList" :key="item.BOARDNO">
-                <td>{{ item.BOARDNO }}</td>
-                <td>
-                    <a href="javascript:;" @click="fnView(item.BOARDNO)">{{ item.TITLE }}</a>
-                </td>
-                <td>
-                    <a href="javascript:;" @click="fnUser(item.USERID)">{{ item.USERNAME }}</a>
-                </td>
-                <td>{{ item.CNT }}</td>
-                <td>{{ item.CDATETIME }}</td>
-                <td><button @click="fnRemove(item.BOARDNO)">삭제</button></td>
-            </tr>
-        </table>
-            <a href="#" @click="prevPage" :disabled="currentPage === 1">
-                < </a>
-                    <a href="#" v-for="page in pageNumbers" :key="page" @click="goToPage(page)"
-                        :class="{ active: currentPage === page }"> {{ page }} </a>
-                    <a href="#" @click="nextPage" :disabled="currentPage === totalPages">></a>
-        <div>
-            <button @click="fnInsert">글쓰기</button>
+        <div id="container">
+            <div class="a-margin">
+                <select v-model="kind" class="r-margin">
+                    <option value="all">::전체::</option>
+                    <option value="title">제목</option>
+                    <option value="name">작성자</option>
+                </select>
+                <input v-model="keyword" @keyup.enter="fnList" class="r-margin"> 
+                <button @click="fnList">검색</button>
+            </div>
+            <div>
+                <select v-model="pageSize" @change="fnList">
+                    <option value="5">5개씩</option>
+                    <option value="10">10개씩</option>
+                    <option value="15">15개씩</option>
+                    <option value="20">20개씩</option>
+                </select>
+            </div>
+            <table>
+                <tr>
+                    <th>번호</th>
+                    <th>
+                        <a href="javascript:;" @click="fnOrder('TITLE')">제목</a>
+                    </th>
+                    <th>
+                        <a href="javascript:;" @click="fnOrder('USERNAME')">작성자</a>
+                    </th>
+                    <th>
+                        <a href="javascript:;" @click="fnOrder('CNT')">조회수</a>
+                    </th>
+                    <th>작성일</th>
+                    <th>삭제</th>
+                </tr>
+                <tr v-for="item in list">
+                    <td>{{item.BOARDNO}}</td>
+                    <td>
+                        <a href="javascript:;" @click="fnView(item.BOARDNO)">{{item.TITLE}}</a>
+                    </td>
+                    <td>
+                        <a href="javascript:;" @click="fnUser(item.USERID)">{{item.USERNAME}}</a>
+                    </td>
+                    <td>{{item.CNT}}</td>
+                    <td>{{item.CDATETIME}}</td>
+                    <td><button @click="fnRemove(item.BOARDNO)">삭제</button></td>
+                </tr>
+            </table>
+            <div style="width: 450px; text-align: center; margin-top : 10px;">
+                <a 
+                    v-if="page != 1"
+                    id="index" 
+                    href="javascript:;" 
+                    class="color-black"
+                    @click="fnPageMove('prev')"> < 
+                </a>
+                
+                <a id="index" href="javascript:;" 
+                    v-for="num in index" @click="fnPage(num)">
+                    <span 
+                        v-if="page == num" 
+                        class="bgcolor-gray color-blue">{{num}}
+                    </span>
+                    <span 
+                        v-else 
+                        class="color-black">{{num}}
+                    </span>
+                </a>
+                <a 
+                    v-if="page != index"
+                    id="index" 
+                    href="javascript:;" 
+                    class="color-black"
+                    @click="fnPageMove('next')"> > 
+                </a>
+            </div>
+            <div>
+                <button @click="fnInsert">글쓰기</button>
+            </div>
+            <div style="margin-bottom : 300px;"></div>
         </div>
-
     </div>
 </body>
-
 </html>
 
 <script>
     const app = Vue.createApp({
         data() {
             return {
-                list: [],
-                currentPage: 1,
-                itemsPerPage: 5,
-                sortKey: '',
-                sortOrder: 1
+                list : [],
+                keyword : "",
+                kind : "all",
+                orderKey : "",
+                orderType : "",
+                index : 0,
+                pageSize : 5,
+                page : 1
             };
         },
-        computed: {
-            paginatedList() {
-                const start = (this.currentPage - 1) * this.itemsPerPage;
-                const end = start + this.itemsPerPage;
-                return this.list.slice(start, end);
-            },
-            totalPages() {
-                return Math.ceil(this.list.length / this.itemsPerPage);
-            },
-            pageNumbers() {
-                return Array.from({ length: this.totalPages }, (v, k) => k + 1);
-            }
-        },
         methods: {
-            fnList: function () {
+            fnList : function() { 
                 var self = this;
-                var nparmap = {};
+                var nparmap = {
+                    keyword : self.keyword, 
+                    kind : self.kind,
+                    orderKey : self.orderKey,
+                    orderType : self.orderType,
+                    pageSize : self.pageSize,
+                    page : (self.page-1) * self.pageSize
+                };
                 $.ajax({
-                    url: "http://localhost:3000/list",
+                    url: "http://localhost:3000/list",  // 서버 주소 수정 (http:// 포함)
                     dataType: "json",
-                    type: "POST",
-                    data: JSON.stringify(nparmap),
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
                     contentType: "application/json",
-                    success: function (data) {
+                    success: function(data) {
                         console.log(data);
                         self.list = data.list;
+                        self.index = Math.ceil(data.count / self.pageSize);
                     }
                 });
             },
-            fnRemove: function (boardNo) {
+            fnRemove : function(boardNo){
                 var self = this;
-                var nparmap = { boardNo: boardNo };
-                if (!confirm("정말 삭제할거?")) {
+                var nparmap = {boardNo : boardNo}; // {boardNo}
+                if(!confirm("정말 삭제할거?")){
                     return;
                 }
                 $.ajax({
-                    url: "http://localhost:3000/remove",
+                    url: "http://localhost:3000/remove",  // 서버 주소 수정 (http:// 포함)
                     dataType: "json",
-                    type: "POST",
-                    data: JSON.stringify(nparmap),
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
                     contentType: "application/json",
-                    success: function (data) {
+                    success: function(data) {
                         alert("삭제되었습니다!");
                         console.log(data);
                         self.fnList();
+                        
                     }
                 });
             },
-            fnView: function (boardNo) {
-                location.href = "board-view.html?boardNo=" + boardNo;
+            fnView : function(boardNo){
+                location.href = "board-view.html?boardNo="+boardNo;
             },
-            fnInsert: function () {
+            fnInsert : function(){
                 location.href = "board-insert.html";
             },
-            fnUser: function (userId) {
-                location.href = "user-view.html?userId=" + userId;
+            fnUser : function(userId){
+                location.href = "user-view.html?userId="+userId;
             },
-            fnOrder: function (key) {
-                if (this.sortKey === key) {
-                    this.sortOrder *= -1;
+
+            fnOrder : function(orderKey){
+                let self = this;
+                if(self.orderKey != orderKey){
+                    self.orderType = "";
+                }
+                self.orderKey = orderKey;
+                self.orderType = self.orderType == "ASC" ? "DESC" : "ASC";
+                self.fnList();
+            },
+            fnPage : function(num){
+                let self = this;
+                self.page = num;
+                self.fnList();
+            },
+            fnPageMove : function(direction){
+                let self = this;
+                if(direction == "next"){
+                    self.page++;
                 } else {
-                    this.sortKey = key;
-                    this.sortOrder = 1;
+                    self.page--;
                 }
-                this.list.sort((a, b) => {
-                    if (a[key] < b[key]) return -1 * this.sortOrder;
-                    if (a[key] > b[key]) return 1 * this.sortOrder;
-                    return 0;
-                });
-            },
-            prevPage() {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                }
-            },
-            nextPage() {
-                if (this.currentPage < this.totalPages) {
-                    this.currentPage++;
-                }
-            },
-            goToPage(page) {
-                this.currentPage = page;
+                self.fnList();
             }
-        },
+
+            
+        }, // methods
         mounted() {
+            // 처음 시작할 때 실행되는 부분
             this.fnList();
         }
     });

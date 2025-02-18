@@ -26,6 +26,9 @@
             <span v-if="user.GENDER == 'M'">남자</span> <!-- 남자 or 여자 --> 
             <span v-else>여자</span>
         </div>
+        <div>
+            <button @click="fnEdit">수정</button>
+        </div>
     </div>
 </body>
 </html>
@@ -58,6 +61,10 @@
                         }
                     }
                 });
+            },
+            fnEdit : function() {
+                let self = this;
+                location.href = "user-edit.html?userId="+self.userId;
             }
         },
         mounted() {
