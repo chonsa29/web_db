@@ -58,7 +58,7 @@
                 </tr>
             </table>
             <div style="margin-top : 10px">
-                <button @click="fnRemove">삭제</button>
+                <button style="margin-right: 5px;" @click="fnRemove">삭제</button>
                 <button @click="fnEdit">수정</button>
             </div>
         </div>
@@ -110,9 +110,12 @@
                     }
                 });
             },
-            fnEdit: function(){
+            fnEdit : function(){
+                // board-edit.html 페이지로 이동
+                // 페이지 이동시에 게시글번호(boardNo)를 같이 보내고
+                // board-edit.html에서는 boardNo를 변수에 저장
                 let self = this;
-                location.href = "board-edit.html?boardNo="+self.boardNo;
+                location.href="board-edit.html?boardNo="+self.boardNo;
             }
         }, // methods
         mounted() {

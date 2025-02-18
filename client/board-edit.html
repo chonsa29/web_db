@@ -52,7 +52,7 @@
                 </tr>            
             </table>
             <div style="margin-top : 5px;">
-                <button @click="fnSave" style="margin-right: 5px;">저장</button>
+                <button @click="fnEdit" style="margin-right: 5px;">저장</button>
                 <button>되돌아가기</button>
             </div>
         </div>
@@ -65,7 +65,7 @@
         data() {
             return {
                 // 변수
-                info: {},
+                info : {}, 
                 boardNo : ""
             };
         },
@@ -77,22 +77,46 @@
                     boardNo : self.boardNo
                 };
                 $.ajax({
-                    url: "http://localhost:3000/info",  // 서버 주소 수정 (http:// 포함)
+                    url: "http://localhost:3000/board/info",  // 서버 주소 수정 (http:// 포함)
                     dataType: "json",
                     type: "POST", // GET, POST
                     data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
                     contentType: "application/json",
                     success: function (data) {
-                        self.info = data.info
+                        self.info = data.info;
                     }
                 });
             },
-        },//methods
+            fnEdit : function(){
+                let self = this;
+                let nparmap = self.info;
+                console.log(self.info);
+                // let nparmap = {
+                // title : self.info.TITLE,
+                // contents : self.info.CONTENTS
+                // boardNo : self.boardNo    
+                //}
+                //
+                $.ajax({
+                    url: "http://localhost:3000/board/edit",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        if(data.msg == "success"){
+                            alert("수정되었습니다.");
+                            location.href = "board-list.html";
+                        }
+                    }
+                });
+            }
+        },
         mounted() {
             // 처음 시작할 때 실행되는 부분
             const queryParams = new URLSearchParams(window.location.search);
             this.boardNo = queryParams.get('boardNo'); 
-            console.log("boardNo ===> ", this.boardNo);
+            console.log("boardNo == > ", this.boardNo);
             this.fnGetBoard();
         }
     });

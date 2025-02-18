@@ -118,6 +118,35 @@ app.post('/remove', async (req, res) => {
   }
 });
 
+app.post('/board/edit', async (req, res) => {
+  console.log(req.body);
+  const { TITLE, CONTENTS, BOARDNO } = req.body;  // 클라이언트에서 보낸 데이터
+  try {
+    const connection = await connectToDB();
+    if (connection) {
+      const result = await connection.execute(
+        `UPDATE BOARD 
+         SET 
+            TITLE = :TITLE,
+            CONTENTS = :CONTENTS,
+            UDATETIME = SYSDATE
+          WHERE BOARDNO = :BOARDNO`,
+        [TITLE, CONTENTS, BOARDNO], 
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      
+      await connection.commit();
+      res.send({ msg: 'success'});
+      await connection.close();
+    } else {
+      res.status(500).send({ msg: 'DB 연결 실패' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ msg: '로그인 중 오류가 발생했습니다.' });
+  }
+});
+
 app.post('/view', async (req, res) => {
   const {boardNo} = req.body;  // 클라이언트에서 보낸 데이터
   try {
@@ -153,12 +182,11 @@ app.post('/view', async (req, res) => {
   }
 });
 
-
-app.post('/info', async (req, res) => {
+app.post('/board/info', async (req, res) => {
   const {boardNo} = req.body;  // 클라이언트에서 보낸 데이터
   try {
     const connection = await connectToDB();
-    if (connection) {
+    if (connection) {  
       const result = await connection.execute(
         `SELECT 
           BOARDNO, TITLE, USERNAME, CONTENTS,
@@ -179,6 +207,7 @@ app.post('/info', async (req, res) => {
     res.status(500).send({ msg: '로그인 중 오류가 발생했습니다.' });
   }
 });
+
 
 app.post('/insert', async (req, res) => {
   console.log(req.body);
