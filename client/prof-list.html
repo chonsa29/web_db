@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+
+        table,
+        tr,
+        th,
+        td {
+            text-align: center;
+            border: 2px solid #bbb;
+            border-collapse: collapse;
+            padding: 5px;
+        }
+
+        th {
+            color: rgb(132, 39, 219);
+            background-color: aliceblue;
+            /* font-size: 30px; */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <table>
+            <tr>
+                <th>선택</th>
+                <th>교수번호</th>
+                <th>
+                    이름
+                </th>
+                <th>
+                    직책
+                </th>
+                <th>
+                    급여
+                </th>
+                <th>입사일</th>
+                <th>학과명</th>
+            </tr>
+            <tr v-for="item in list">
+                <td>
+                    <input type="checkbox" :value="item.PROFNO" v-model="selectItems">
+                </td>
+                <td>{{item.PROFNO}}</td>
+                <td>
+                    {{item.NAME}}
+                </td>
+                <td>
+                    {{item.POSITION}}
+                </td>
+                <td>{{item.PAY}}</td>
+                <td>{{item.HIREDATE}}</td>
+                <td>{{item.DNAME}}</td>
+            </tr>
+        </table>
+        <button @click="fnRemove">삭제</button>
+    </div>
+</body>
+
+</html>
+
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                // 변수
+                list: [],
+                selectItems: []
+            };
+        },
+        methods: {
+            fnList: function () {
+                var self = this;
+                var nparmap = {};
+                $.ajax({
+                    url: "http://localhost:3000/list2",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        console.log(data);
+                        self.list = data.list;
+                    }
+                });
+            },
+            fnRemove: function () {
+                
+                var self = this;
+
+                console.log(self.selectItems);
+
+                if(!confirm("정말 삭제하시겠습니까?")){
+                    return;
+                }
+                var nparmap = {ProfNo : self.selectItems};
+                    $.ajax({
+                        url: "http://localhost:3000/remove2",  // 서버 주소 수정 (http:// 포함)
+                        dataType: "json",
+                        type: "POST", // GET, POST
+                        data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                        contentType: "application/json",
+                        success: function (data) {
+                           self.fnList();
+                           
+                        }
+                    })
+
+            }
+        },
+        mounted() {
+            // 처음 시작할 때 실행되는 부분
+            this.fnList();
+        }
+    });
+
+    app.mount('#app');
+</script>

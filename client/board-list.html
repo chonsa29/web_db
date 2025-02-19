@@ -40,7 +40,7 @@
             background-color: #ddd;
         }
         #container{
-            width: 500px;
+            width: 600px;
             margin : 20px auto;
         }
         a{
@@ -86,7 +86,7 @@
                 <tr v-for="item in list">
                     <td>{{item.BOARDNO}}</td>
                     <td>
-                        <a href="javascript:;" @click="fnView(item.BOARDNO)">{{item.TITLE}}</a>
+                        <a href="javascript:;" @click="fnView(item.BOARDNO)">{{item.TITLE}}<span v-if="item.COMMENTCNT!= 0">({{item.COMMENTCNT}})</span></a>
                     </td>
                     <td>
                         <a href="javascript:;" @click="fnUser(item.USERID)">{{item.USERNAME}}</a>

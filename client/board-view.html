@@ -1,37 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>연습!!!!!!!!</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"
+        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        #container{
+        #container {
             width: 800px;
-            margin : 20px auto;
+            margin: 20px auto;
         }
-        table, tr, th, td {
+
+        table,
+        tr,
+        th,
+        td {
             text-align: center;
-            border : 2px solid #bbb;
+            border: 2px solid #bbb;
             border-collapse: collapse;
-            padding : 5px;
+            padding: 5px;
         }
+
         th {
-            color : rgb(132, 39, 219);
+            color: rgb(132, 39, 219);
             background-color: aliceblue;
             width: 150px;
             /* font-size: 30px; */
         }
-        td{
+
+        td {
             width: 500px;
         }
-        #contents{
+
+        #contents {
             padding: 30px;
             height: 200px;
         }
+
+        .comment-pad {
+            padding: 0px 30px;
+        }
     </style>
 </head>
+
 <body>
     <div id="app">
         <div id="container">
@@ -57,43 +71,72 @@
                     <td id="contents">{{info.CONTENTS}}</td>
                 </tr>
             </table>
-            <div style="margin-top : 10px">
+            <div>
+                <table style="margin-top:50px;">
+                    <tr style="background-color:aliceblue;color:black;font-weight:bold;">
+                        <th>작성자</th>
+                        <td>내용</td>
+                    </tr style="background-color:white;">
+                    <tr v-for="item in commentList">
+                        <th>{{item.USERID}}</th>
+                        <td class="comment-pad">{{item.CONTENTS}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <table>
+                    <tr>
+                        <th>댓글입력:</th>
+                        <td style="width:400px;">
+                            <textarea v-model="comment" cols="65" rows="5"></textarea>
+                        </td>
+                        <td style="width:60px;">
+                            <button @click="fnCommentSave">저장</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div>
                 <button style="margin-right: 5px;" @click="fnRemove">삭제</button>
                 <button @click="fnEdit">수정</button>
             </div>
         </div>
     </div>
 </body>
+
 </html>
 
 <script>
     const app = Vue.createApp({
         data() {
             return {
-                info : {},
-                boardNo : "" 
+                info: {},
+                commentList: [],
+                boardNo: "",
+                comment: ""
             };
         },
         methods: {
-            fnInfo : function() { 
+            fnInfo: function () {
                 var self = this;
-                var nparmap = {boardNo : self.boardNo};
+                var nparmap = { boardNo: self.boardNo };
                 $.ajax({
                     url: "http://localhost:3000/view",  // 서버 주소 수정 (http:// 포함)
                     dataType: "json",
                     type: "POST", // GET, POST
                     data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
                     contentType: "application/json",
-                    success: function(data) {
-                        console.log(data.info);
+                    success: function (data) {
+                        console.log(data);
                         self.info = data.info;
+                        self.commentList = data.commentList;
                     }
                 });
             },
-            fnRemove : function(){
+            fnRemove: function () {
                 var self = this;
-                var nparmap = {boardNo : self.boardNo}; // {boardNo}
-                if(!confirm("정말 삭제할거?")){
+                var nparmap = { boardNo: self.boardNo }; // {boardNo}
+                if (!confirm("정말 삭제할거?")) {
                     return;
                 }
                 $.ajax({
@@ -102,26 +145,50 @@
                     type: "POST", // GET, POST
                     data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
                     contentType: "application/json",
-                    success: function(data) {
+                    success: function (data) {
                         alert("삭제되었습니다!");
-                        location.href="board-list.html";
+                        location.href = "board-list.html";
                         // history.back();
-                        
+
                     }
                 });
             },
-            fnEdit : function(){
+            fnEdit: function () {
                 // board-edit.html 페이지로 이동
                 // 페이지 이동시에 게시글번호(boardNo)를 같이 보내고
                 // board-edit.html에서는 boardNo를 변수에 저장
                 let self = this;
-                location.href="board-edit.html?boardNo="+self.boardNo;
+                location.href = "board-edit.html?boardNo=" + self.boardNo;
+            },
+            fnCommentSave: function () {
+                var self = this;
+                var nparmap = {
+                    boardNo: self.boardNo,
+                    comment: self.comment
+                }; // {boardNo}
+
+                $.ajax({
+                    url: "http://localhost:3000/comment/save",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+   
+                        if (data.msg == "success") {
+                            alert("댓글이 저장되었습니다.");
+                        } else {
+                            alert("댓글 저장 실패!");
+                        }
+                        self.FnInfo();
+                    }
+                });
             }
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분
             const queryParams = new URLSearchParams(window.location.search);
-            this.boardNo = queryParams.get('boardNo'); 
+            this.boardNo = queryParams.get('boardNo');
             console.log("boardNo ===> ", this.boardNo);
             this.fnInfo();
         }
