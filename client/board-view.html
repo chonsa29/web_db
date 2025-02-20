@@ -79,7 +79,24 @@
                     </tr style="background-color:white;">
                     <tr v-for="item in commentList">
                         <th>{{item.USERID}}</th>
-                        <td class="comment-pad">{{item.CONTENTS}}</td>
+
+                        <td class="comment-pad">
+                            <label v-if="editCommentNo ==item.COMMENTNO">
+                                <input v-model="editContents">
+                            </label>
+                            <label v-else>{{item.CONTENTS}}</label>
+                        </td>
+                        <td>
+                            <template v-if="editCommentNo == item.COMMENTNO">
+                                <button @click="fnEdit2(item.COMMENTNO)">저장</button>
+                                <button @click="fnCancel(item.CONTENTS)">취소</button>
+
+                            </template>
+                            <template v-else>
+                                <button @click="fnEdit2(item)">수정</button>
+                                <button @click="fnRemove(item.COMMENTNO)">삭제</button>
+                            </template>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -113,7 +130,9 @@
                 info: {},
                 commentList: [],
                 boardNo: "",
-                comment: ""
+                comment: "",
+                editCommentNo: "",
+                editdContents: ""
             };
         },
         methods: {
@@ -163,8 +182,8 @@
             fnCommentSave: function () {
                 var self = this;
                 var nparmap = {
-                    boardNo: self.boardNo,
-                    comment: self.comment
+                    comment: self.comment,
+                    boardNo: self.boardNo
                 }; // {boardNo}
 
                 $.ajax({
@@ -174,15 +193,61 @@
                     data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
                     contentType: "application/json",
                     success: function (data) {
-   
                         if (data.msg == "success") {
                             alert("댓글이 저장되었습니다.");
+                            self.comment = "";
+                            self.fnInfo();
                         } else {
                             alert("댓글 저장 실패!");
                         }
-                        self.FnInfo();
+
                     }
                 });
+            },
+            fnRemove: function (commentNo) {
+                var self = this;
+                var nparmap = { commentNo: commentNo }; // {boardNo}
+                if (!confirm("정말 삭제하시겠습니까?")) {
+                    return;
+                }
+                $.ajax({
+                    url: "http://localhost:3000/comment/remove",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        alert("삭제되었습니다!");
+                        console.log(data);
+                        self.fnInfo();
+                    }
+                });
+            },
+            fnEdit2: function (item) {
+                var self = this;
+                self.editCommentNo = item.COMMENTNO;
+                self.editContents = item.CONTENTS;
+                
+                var nparmap = {}; // {boardNo}
+                if (!confirm("수정하시겠습니까?")) {
+                    return;
+                }
+                $.ajax({
+                    url: "http://localhost:3000/comment/edit",  // 서버 주소 수정 (http:// 포함)
+                    dataType: "json",
+                    type: "POST", // GET, POST
+                    data: JSON.stringify(nparmap),   // 서버로 보낼 데이터
+                    contentType: "application/json",
+                    success: function (data) {
+                        console.log(data);
+                        self.fnInfo();
+                    }
+                });
+            },
+            fnCancel: function (contents) {
+                var self = this;
+                self.editCommentNo = "";
+                self.editContents = contents;
             }
         }, // methods
         mounted() {

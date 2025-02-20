@@ -225,6 +225,34 @@ app.post('/board/edit', async (req, res) => {
   }
 });
 
+app.post('/comment/edit', async (req, res) => {
+  console.log(req.body);
+  const { commentNo, contents } = req.body;  // 클라이언트에서 보낸 데이터
+  try {
+    const connection = await connectToDB();
+    if (connection) {
+      const result = await connection.execute(
+        `UPDATE BOARD_COMMENT 
+         SET 
+            CONTENTS = :CONTENTS,
+            UDATETIME = SYSDATE
+          WHERE COMMENTNO = :COMMENTNO`,
+        [contents, commentNo],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      await connection.commit();
+      res.send({ msg: 'success' });
+      await connection.close();
+    } else {
+      res.status(500).send({ msg: 'DB 연결 실패' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ msg: '로그인 중 오류가 발생했습니다.' });
+  }
+});
+
 app.post('/user/edit', async (req, res) => {
   console.log(req.body);
   const { USERID, USERNAME, EMAIL, PHONE, GENDER } = req.body;  // 클라이언트에서 보낸 데이터
@@ -355,15 +383,14 @@ app.post('/insert', async (req, res) => {
 app.post('/comment/save', async (req, res) => {
   console.log(req.body);
   const { comment, boardNo } = req.body;  // 클라이언트에서 보낸 데이터
-
   try {
     const connection = await connectToDB();
     if (connection) {
       const result = await connection.execute(
         `INSERT INTO BOARD_COMMENT
-         VALUES(COMMENT_SEQ.NEXTVAL, :boardNo, 'user01', :comment, 
-         null, SYSDATE, SYSDATE)`,
-       [boardNo ,cmt], 
+         VALUES(COMMENT_SEQ.NEXTVAL, :boardNo, 'user01', :\"comment\", 
+         1, SYSDATE, SYSDATE)`,
+         [boardNo,comment],
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
 
@@ -443,6 +470,29 @@ app.post('/remove2', async (req, res) => {
   }
 });
 
+app.post('/comment/remove', async (req, res) => {
+  console.log(req.body);
+  const { commentNo } = req.body;  // 클라이언트에서 보낸 데이터
+  try {
+    const connection = await connectToDB();
+    if (connection) {
+      const result = await connection.execute(
+        `DELETE FROM BOARD_COMMENT WHERE COMMENTNO = :commentNo`,
+        [commentNo],
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      await connection.commit();
+      res.send({ msg: 'success' });
+      await connection.close();
+    } else {
+      res.status(500).send({ msg: 'DB 연결 실패' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ msg: '로그인 중 오류가 발생했습니다.' });
+  }
+});
 
 app.listen(3000, () => {
   console.log('서버가 3000 포트에서 실행 중입니다.');
